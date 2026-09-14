@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Bill Splitter</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: #f8fafc;
+        }
+
+        input[type="range"] {
+            accent-color: #f97316;
+        }
+
+        .number-input::-webkit-inner-spin-button,
+        .number-input::-webkit-outer-spin-button {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen bg-slate-50 text-slate-800">
+
+    <!-- ================= HEADER ================= -->
+    <header class="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur">
+
+        <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
+
+            <div class="flex items-center gap-3">
+
+                <div class="grid h-11 w-11 place-items-center rounded-2xl bg-orange-500 text-xl">
+                    🍽️
+                </div>
+
+                <div>
+                    <h1 class="font-extrabold tracking-tight text-slate-900">
+                        Bill <span class="text-orange-500">Splitter</span>
+                    </h1>
+
+                    <p class="text-xs text-slate-500">
+                        Smart bill splitting
+                    </p>
+                </div>
+
+            </div>
+
+            <button
+                id="resetTop"
+                class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-orange-300 hover:text-orange-600">
+
+                Reset
+
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- ================= MAIN ================= -->
+    <main class="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+
+
+        <!-- HERO SECTION -->
+        <section class="mb-8">
+
+            <div class="max-w-3xl">
+
+                <span
+                    class="inline-flex items-center gap-2 rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-600">
+
+                    <span class="h-2 w-2 rounded-full bg-orange-500"></span>
+
+                    Restaurant Calculator
+
+                </span>
+
+
+                <h2 class="mt-4 text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">
+
+                    Split the bill.<br>
+
+                    <span class="text-orange-500">
+                        Keep it simple.
+                    </span>
+
+                </h2>
+
+
+                <p class="mt-4 max-w-2xl text-base leading-7 text-slate-500 sm:text-lg">
+
+                    Enter your bill, choose a tip, add the number of people,
+                    and get the exact amount each person should pay.
+
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================= CALCULATOR ================= -->
+        <section class="grid gap-6 lg:grid-cols-5">
+
+
+            <!-- ================= INPUT CARD ================= -->
+            <div
+                class="rounded-3xl bg-white p-5 shadow-xl ring-1 ring-slate-100 sm:p-7 lg:col-span-3">
+
+                <div class="mb-7 flex items-center justify-between">
+
+                    <div>
+
+                        <h3 class="text-xl font-extrabold text-slate-900">
+                            Bill details
+                        </h3>
+
+                        <p class="mt-1 text-sm text-slate-500">
+                            Fill in the details below.
+                        </p>
+
+                    </div>
+
+
+                    <div class="rounded-2xl bg-orange-50 px-3 py-2 text-center">
+
+                        <span class="block text-[10px] font-bold uppercase tracking-wider text-orange-500">
+                            Currency
+                        </span>
+
+                        <span class="font-bold text-orange-700">
+                            ₹ INR
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="space-y-6">
+
+
+                    <!-- BILL AMOUNT -->
+                    <div>
+
+                        <label
+                            for="bill"
+                            class="mb-2 block text-sm font-bold text-slate-700">
+
+                            Bill amount
+
+                        </label>
+
+
+                        <div class="relative">
+
+                            <span
+                                class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-slate-400">
+
+                                ₹
+
+                            </span>
+
+
+                            <input
+                                id="bill"
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value="1200"
+                                placeholder="0.00"
+
+                                class="number-input w-full rounded-2xl border border-slate-200 bg-slate-50 py-4 pl-10 pr-4 text-lg font-bold outline-none transition focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100">
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- NUMBER OF PEOPLE -->
+                    <div>
+
+                        <div class="mb-2 flex items-center justify-between">
+
+                            <label
+                                for="people"
+                                class="text-sm font-bold text-slate-700">
+
+                                Number of people
+
+                            </label>
+
+
+                            <span
+                                id="peopleValue"
+                                class="rounded-lg bg-slate-100 px-2.5 py-1 text-sm font-extrabold text-slate-700">
+
+                                4
+
+                            </span>
+
+                        </div>
+
+
+                        <input
+                            id="people"
+                            type="range"
+                            min="1"
+                            max="20"
+                            value="4"
+                            class="w-full cursor-pointer">
+
+
+                        <div class="mt-2 flex justify-between text-xs text-slate-400">
+
+                            <span>1 person</span>
+
+                            <span>20 people</span>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- TIP -->
+                    <div>
+
+                        <div class="mb-3 flex items-center justify-between">
+
+                            <label class="text-sm font-bold text-slate-700">
+
+                                Tip percentage
+
+                            </label>
+
+
+                            <span
+                                id="tipValue"
+                                class="rounded-lg bg-orange-100 px-2.5 py-1 text-sm font-extrabold text-orange-700">
+
+                                10%
+
+                            </span>
+
+                        </div>
+
+
+
+                        <!-- TIP BUTTONS -->
+
+                        <div class="grid grid-cols-4 gap-2 sm:grid-cols-7">
+
+
+                            <button
+                                class="tip-btn rounded-xl border border-slate-200 px-2 py-3 text-sm font-bold transition hover:border-orange-300 hover:bg-orange-50"
+                                data-tip="0">
+
+                                0%
+
+                            </button>
+
+
+                            <button
+                                class="tip-btn rounded-xl border border-slate-200 px-2 py-3 text-sm font-bold transition hover:border-orange-300 hover:bg-orange-50"
+                                data-tip="5">
+
+                                5%
+
+                            </button>
+
+
+                            <button
+                                class="tip-btn rounded-xl border border-slate-200 px-2 py-3 text-sm font-bold transition hover:border-orange-300 hover:bg-orange-50"
+                                data-tip="10">
+
+                                10%
+
+                            </button>
+
+
+                            <button
+                                class="tip-btn rounded-xl border border-slate-200 px-2 py-3 text-sm font-bold transition hover:border-orange-300 hover:bg-orange-50"
+                                data-tip="15">
+
+                                15%
+
+                            </button>
+
+
+                            <button
+                                class="tip-btn rounded-xl border border-slate-200 px-2 py-3 text-sm font-bold transition hover:border-orange-300 hover:bg-orange-50"
+                                data-tip="18">
+
+                                18%
+
+                            </button>
+
+
+                            <button
+                                class="tip-btn rounded-xl border border-slate-200 px-2 py-3 text-sm font-bold transition hover:border-orange-300 hover:bg-orange-50"
+                                data-tip="20">
+
+                                20%
+
+                            </button>
+
+
+                            <button
+                                class="tip-btn rounded-xl border border-slate-200 px-2 py-3 text-sm font-bold transition hover:border-orange-300 hover:bg-orange-50"
+                                data-tip="25">
+
+                                25%
+
+                            </button>
+
+                        </div>
+
+
+
+                        <!-- CUSTOM TIP -->
+
+                        <div class="mt-3 flex items-center gap-3">
+
+                            <label
+                                for="customTip"
+                                class="text-xs font-semibold text-slate-500">
+
+                                Custom tip
+
+                            </label>
+
+
+                            <div class="relative flex-1">
+
+                                <input
+                                    id="customTip"
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    step="1"
+                                    value="10"
+
+                                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 pr-9 text-sm font-bold outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100">
+
+
+                                <span
+                                    class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 font-bold text-slate-400">
+
+                                    %
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- TAX -->
+                    <div>
+
+                        <label
+                            for="tax"
+                            class="mb-2 block text-sm font-bold text-slate-700">
+
+                            Tax / service charge
+
+                            <span class="font-normal text-slate-400">
+                                (optional)
+                            </span>
+
+                        </label>
+
+
+                        <div class="relative">
+
+                            <input
+                                id="tax"
+                                type="number"
+                                min="0"
+                                max="100"
+                                step="0.1"
+                                value="0"
+
+                                class="w-full rounded-2xl border border-slate-200 bg-slate-50 py-4 px-4 pr-10 font-bold outline-none transition focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100">
+
+
+                            <span
+                                class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">
+
+                                %
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ================= RESULT CARD ================= -->
+
+            <div
+                class="relative overflow-hidden rounded-3xl bg-slate-900 p-6 text-white shadow-xl sm:p-8 lg:col-span-2">
+
+
+                <div
+                    class="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-orange-500/20 blur-2xl">
+                </div>
+
+
+                <div class="relative">
+
+
+                    <p class="text-sm font-semibold text-slate-400">
+
+                        Each person pays
+
+                    </p>
+
+
+                    <div
+                        id="perPerson"
+                        class="mt-2 text-5xl font-black tracking-tight sm:text-6xl">
+
+                        ₹330.00
+
+                    </div>
+
+
+                    <p
+                        id="summaryText"
+                        class="mt-3 text-sm leading-6 text-slate-400">
+
+                        4 people • 10% tip • no tax
+
+                    </p>
+
+
+
+                    <div class="my-7 h-px bg-slate-700"></div>
+
+
+
+                    <!-- BILL BREAKDOWN -->
+
+                    <div class="space-y-4">
+
+
+                        <div class="flex items-center justify-between">
+
+                            <span class="text-sm text-slate-400">
+                                Bill
+                            </span>
+
+                            <strong id="billOut">
+                                ₹1,200.00
+                            </strong>
+
+                        </div>
+
+
+
+                        <div class="flex items-center justify-between">
+
+                            <span class="text-sm text-slate-400">
+                                Tax / service
+                            </span>
+
+                            <strong id="taxOut">
+                                ₹0.00
+                            </strong>
+
+                        </div>
+
+
+
+                        <div class="flex items-center justify-between">
+
+                            <span class="text-sm text-slate-400">
+                                Tip
+                            </span>
+
+                            <strong id="tipOut">
+                                ₹120.00
+                            </strong>
+
+                        </div>
+
+
+
+                        <div
+                            class="flex items-center justify-between border-t border-slate-700 pt-4">
+
+                            <span class="font-bold">
+                                Total
+                            </span>
+
+                            <strong
+                                id="totalOut"
+                                class="text-xl text-orange-400">
+
+                                ₹1,320.00
+
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- CALCULATE BUTTON -->
+
+                    <button
+                        id="calculateBtn"
+
+                        class="mt-8 w-full rounded-2xl bg-orange-500 px-5 py-4 font-extrabold text-white transition hover:bg-orange-600 active:scale-[0.99]">
+
+                        Calculate Bill
+
+                    </button>
+
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================= FEATURES ================= -->
+
+        <section class="mt-8 grid gap-4 sm:grid-cols-3">
+
+
+            <article
+                class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
+
+                <div class="mb-3 text-2xl">
+                    ⚡
+                </div>
+
+                <h3 class="font-extrabold">
+                    Instant calculation
+                </h3>
+
+                <p class="mt-1 text-sm leading-6 text-slate-500">
+
+                    Results are calculated accurately using JavaScript.
+
+                </p>
+
+            </article>
+
+
+
+            <article
+                class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
+
+                <div class="mb-3 text-2xl">
+                    👥
+                </div>
+
+                <h3 class="font-extrabold">
+                    Fair split
+                </h3>
+
+                <p class="mt-1 text-sm leading-6 text-slate-500">
+
+                    Split the complete bill among everyone.
+
+                </p>
+
+            </article>
+
+
+
+            <article
+                class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
+
+                <div class="mb-3 text-2xl">
+                    📱
+                </div>
+
+                <h3 class="font-extrabold">
+                    Mobile friendly
+                </h3>
+
+                <p class="mt-1 text-sm leading-6 text-slate-500">
+
+                    Works smoothly on mobile, tablet and desktop.
+
+                </p>
+
+            </article>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- ================= FOOTER ================= -->
+
+   
+
+<footer class="mt-10 bg-linear-to-r from-gray-900 via-slate-800 to-black text-white">
+
+  <div class="max-w-6xl mx-auto py-8 text-center">
+
+    <span class="text-black font-bold text-center ">
+                Bill Splitter
+            </span>
+
+  </div>
+
+</footer>
+
+    <!-- ================= JAVASCRIPT ================= -->
+    <script src="script.js"></script>
+
+
+    <script src="./script.js" defer></script>
+</body>
+</html>
