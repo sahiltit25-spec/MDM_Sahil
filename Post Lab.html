@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Study Tracker</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { display: ['"Bricolage Grotesque"', 'sans-serif'], sans: ['Figtree', 'sans-serif'] }, colors: { ink: '#1f2a6b', hl: '#ffd84d' } } } };
+</script>
+<style>
+  body { background-image: linear-gradient(rgba(43,58,140,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(43,58,140,.06) 1px, transparent 1px); background-size: 28px 28px; }
+  .dark body { background-image: linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px); }
+  .ring { transition: stroke-dashoffset .4s linear; }
+  :focus-visible { outline: 3px solid #ffd84d; outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body class="font-sans bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen">
+
+<header class="bg-ink text-white">
+  <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
+    <h1 class="font-display text-2xl font-extrabold tracking-tight">Study<span class="bg-hl text-ink px-1 rounded">Nations</span></h1>
+    <p id="today" class="hidden sm:block text-sm text-indigo-100"></p>
+    <button id="themeBtn" class="rounded-lg bg-white/15 hover:bg-white/25 px-3 py-1.5 text-sm font-medium" aria-label="Toggle dark mode">Dark mode</button>
+  </div>
+  <nav class="max-w-6xl mx-auto px-4 flex gap-1 overflow-x-auto" id="nav">
+    <button data-tab="dash" class="tab">Overview</button>
+    <button data-tab="timer" class="tab">Focus timer</button>
+    <button data-tab="tasks" class="tab">Assignments</button>
+    <button data-tab="subjects" class="tab">Subjects</button>
+    <button data-tab="log" class="tab">Study log</button>
+  </nav>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 py-6">
+
+  <!-- OVERVIEW -->
+  <section id="dash" class="panel space-y-6">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="stats"></div>
+    <div class="grid lg:grid-cols-3 gap-6">
+      <div class="card lg:col-span-2">
+        <h2 class="h2">Last 7 days (minutes)</h2>
+        <div id="chart" class="flex items-end gap-2 h-48 mt-4"></div>
+      </div>
+      <div class="card">
+        <h2 class="h2">Weekly goals</h2>
+        <div id="goals" class="mt-3 space-y-4"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2 class="h2">Due soon</h2>
+      <ul id="upcoming" class="mt-3 divide-y divide-slate-200 dark:divide-slate-700"></ul>
+    </div>
+  </section>
+
+  <!-- TIMER -->
+  <section id="timer" class="panel hidden">
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="card text-center">
+        <div class="inline-flex rounded-lg bg-slate-100 dark:bg-slate-700 p-1 text-sm font-medium" id="modes">
+          <button data-mode="25" class="mode">Focus 25</button>
+          <button data-mode="50" class="mode">Deep 50</button>
+          <button data-mode="5" class="mode">Break 5</button>
+        </div>
+        <div class="relative w-60 h-60 mx-auto my-6">
+          <svg viewBox="0 0 120 120" class="w-full h-full -rotate-90">
+            <circle cx="60" cy="60" r="54" fill="none" stroke-width="8" class="stroke-slate-200 dark:stroke-slate-700"/>
+            <circle id="ring" class="ring" cx="60" cy="60" r="54" fill="none" stroke="#2b3a8c" stroke-width="8" stroke-linecap="round" stroke-dasharray="339.3" stroke-dashoffset="0"/>
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <span id="clock" class="font-display text-5xl font-extrabold tabular-nums">25:00</span>
+            <span id="clockLabel" class="text-sm text-slate-500 dark:text-slate-400">Ready to focus</span>
+          </div>
+        </div>
+        <label class="block text-sm font-medium mb-1 text-left" for="timerSubject">Studying</label>
+        <select id="timerSubject" class="input mb-4"></select>
+        <div class="flex gap-3 justify-center">
+          <button id="startBtn" class="btn-primary">Start</button>
+          <button id="resetBtn" class="btn-ghost">Reset</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="h2">Log a session manually</h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Studied without the timer? Add it here.</p>
+        <form id="logForm" class="space-y-3">
+          <div><label class="lbl" for="logSubject">Subject</label><select id="logSubject" class="input" required></select></div>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="lbl" for="logMin">Minutes</label><input id="logMin" type="number" min="1" max="720" class="input" required></div>
+            <div><label class="lbl" for="logDate">Date</label><input id="logDate" type="date" class="input" required></div>
+          </div>
+          <div><label class="lbl" for="logNote">What did you cover?</label><input id="logNote" class="input" maxlength="100" placeholder="e.g. Chapter 4 practice problems"></div>
+          <button class="btn-primary w-full">Add session</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- TASKS -->
+  <section id="tasks" class="panel hidden">
+    <div class="grid lg:grid-cols-3 gap-6">
+      <form id="taskForm" class="card space-y-3 h-fit">
+        <h2 class="h2">New assignment</h2>
+        <div><label class="lbl" for="taskTitle">Title</label><input id="taskTitle" class="input" maxlength="80" required placeholder="Lab report 3"></div>
+        <div><label class="lbl" for="taskSubject">Subject</label><select id="taskSubject" class="input"></select></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="lbl" for="taskDue">Due date</label><input id="taskDue" type="date" class="input" required></div>
+          <div><label class="lbl" for="taskPri">Priority</label>
+            <select id="taskPri" class="input"><option value="2">High</option><option value="1" selected>Medium</option><option value="0">Low</option></select></div>
+        </div>
+        <button class="btn-primary w-full">Add assignment</button>
+      </form>
+      <div class="card lg:col-span-2">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h2 class="h2">Your assignments</h2>
+          <div class="inline-flex rounded-lg bg-slate-100 dark:bg-slate-700 p-1 text-sm font-medium" id="taskFilter">
+            <button data-f="open" class="mode">Open</button>
+            <button data-f="done" class="mode">Done</button>
+            <button data-f="all" class="mode">All</button>
+          </div>
+        </div>
+        <ul id="taskList" class="mt-3 divide-y divide-slate-200 dark:divide-slate-700"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUBJECTS -->
+  <section id="subjects" class="panel hidden">
+    <div class="grid lg:grid-cols-3 gap-6">
+      <form id="subjForm" class="card space-y-3 h-fit">
+        <h2 class="h2">Add a subject</h2>
+        <div><label class="lbl" for="subjName">Name</label><input id="subjName" class="input" maxlength="30" required placeholder="Data Structures"></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="lbl" for="subjGoal">Weekly goal (hours)</label><input id="subjGoal" type="number" min="1" max="60" value="5" class="input" required></div>
+          <div><label class="lbl" for="subjColor">Colour</label><input id="subjColor" type="color" value="#2b3a8c" class="input h-[42px] p-1"></div>
+        </div>
+        <button class="btn-primary w-full">Add subject</button>
+      </form>
+      <div class="lg:col-span-2 grid sm:grid-cols-2 gap-4 content-start" id="subjList"></div>
+    </div>
+  </section>
+
+  <!-- LOG -->
+  <section id="log" class="panel hidden">
+    <div class="card">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h2 class="h2">Study log</h2>
+        <select id="logFilter" class="input w-auto" aria-label="Filter by subject"></select>
+      </div>
+      <ul id="logList" class="mt-3 divide-y divide-slate-200 dark:divide-slate-700"></ul>
+    </div>
+  </section>
+</main>
+
+<div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-ink text-white px-4 py-2 rounded-lg shadow-lg text-sm opacity-0 pointer-events-none transition-opacity"></div>
+<footer class=" bg-ink text-white max-w-6xl mx-auto px-4 flex gap-1 overflow-x-auto text-center">Created by Sahil -> IT25103</footer>
+<script>
+/* ---------- Tiny helpers ---------- */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const uid = () => Math.random().toString(36).slice(2, 9);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const iso = d => { const z = new Date(d); z.setMinutes(z.getMinutes() - z.getTimezoneOffset()); return z.toISOString().slice(0, 10); };
+const todayStr = () => iso(new Date());
+const fmt = m => m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`;
+const prettyDate = s => new Date(s + 'T00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+
+/* ---------- State (saved in localStorage) ---------- */
+const KEY = 'inkwell-v1';
+let S = { subjects: [], sessions: [], tasks: [], dark: false, filter: 'open' };
+try { const raw = localStorage.getItem(KEY); if (raw) S = { ...S, ...JSON.parse(raw) }; } catch (e) {}
+if (!S.subjects.length) S.subjects = [
+  { id: 's1', name: 'Mathematics', color: '#2b3a8c', goal: 6 },
+  { id: 's2', name: 'Physics', color: '#e0572f', goal: 4 },
+  { id: 's3', name: 'English', color: '#1e9e75', goal: 3 }
+];
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+const subj = id => S.subjects.find(s => s.id === id) || { name: 'Unknown', color: '#888', goal: 0 };
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.style.opacity = 1; clearTimeout(toast.t); toast.t = setTimeout(() => t.style.opacity = 0, 2200); }
+
+/* ---------- Shared component classes ---------- */
+const style = document.createElement('style');
+style.textContent = `
+.card{background:#fff;border-radius:1rem;padding:1.25rem;border:1px solid #e2e8f0}
+.dark .card{background:#1e293b;border-color:#334155}
+.h2{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:1.15rem}
+.lbl{display:block;font-size:.8rem;font-weight:600;margin-bottom:.25rem}
+.input{width:100%;border:1px solid #cbd5e1;border-radius:.6rem;padding:.55rem .75rem;background:#fff;color:inherit}
+.dark .input{background:#0f172a;border-color:#475569}
+.btn-primary{background:#2b3a8c;color:#fff;font-weight:600;padding:.6rem 1.4rem;border-radius:.7rem}
+.btn-primary:hover{background:#1f2a6b}
+.dark .btn-primary{background:#ffd84d;color:#1f2a6b}
+.btn-ghost{border:1px solid #cbd5e1;font-weight:600;padding:.6rem 1.4rem;border-radius:.7rem}
+.dark .btn-ghost{border-color:#475569}
+.tab{padding:.7rem 1rem;font-weight:600;font-size:.9rem;color:#c7d0ff;border-bottom:3px solid transparent;white-space:nowrap}
+.tab:hover{color:#fff}
+.tab.on{color:#fff;border-color:#ffd84d}
+.mode{padding:.35rem .9rem;border-radius:.5rem}
+.mode.on{background:#2b3a8c;color:#fff}
+.dark .mode.on{background:#ffd84d;color:#1f2a6b}
+.chip{font-size:.72rem;font-weight:600;padding:.1rem .5rem;border-radius:999px;color:#fff}
+.x{color:#94a3b8;font-size:.85rem;padding:.25rem .5rem;border-radius:.4rem}
+.x:hover{color:#dc2626}
+`;
+document.head.appendChild(style);
+
+/* ---------- Navigation ---------- */
+function showTab(id) {
+  $$('.panel').forEach(p => p.classList.toggle('hidden', p.id !== id));
+  $$('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === id));
+  location.hash = id;
+}
+$('#nav').addEventListener('click', e => { const b = e.target.closest('.tab'); if (b) showTab(b.dataset.tab); });
+
+/* ---------- Theme ---------- */
+function applyTheme() {
+  document.documentElement.classList.toggle('dark', S.dark);
+  $('#themeBtn').textContent = S.dark ? 'Light mode' : 'Dark mode';
+}
+$('#themeBtn').onclick = () => { S.dark = !S.dark; save(); applyTheme(); };
+
+/* ---------- Stats ---------- */
+function minutesOn(date) { return S.sessions.filter(s => s.date === date).reduce((a, s) => a + s.min, 0); }
+function weekDates() { return [...Array(7)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - (6 - i)); return d; }); }
+function streak() {
+  let n = 0; const d = new Date();
+  if (!minutesOn(iso(d))) d.setDate(d.getDate() - 1);
+  while (minutesOn(iso(d)) > 0) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+
+/* ---------- Renderers ---------- */
+function renderDash() {
+  const week = weekDates().map(iso);
+  const weekMin = week.reduce((a, d) => a + minutesOn(d), 0);
+  const open = S.tasks.filter(t => !t.done).length;
+  const stat = (label, val, hint) => `<div class="card"><p class="text-sm text-slate-500 dark:text-slate-400">${label}</p><p class="font-display text-3xl font-extrabold mt-1">${val}</p><p class="text-xs text-slate-500 dark:text-slate-400 mt-1">${hint}</p></div>`;
+  const goalTotal = S.subjects.reduce((a, s) => a + s.goal * 60, 0);
+  $('#stats').innerHTML =
+    stat('Studied today', fmt(minutesOn(todayStr())), 'Keep it steady') +
+    stat('This week', fmt(weekMin), goalTotal ? `${Math.min(100, Math.round(weekMin / goalTotal * 100))}% of total goal` : 'Set subject goals') +
+    stat('Study streak', `${streak()} day${streak() === 1 ? '' : 's'}`, 'Days in a row') +
+    stat('Open assignments', open, open ? 'See the Assignments tab' : 'All caught up');
+
+  const max = Math.max(60, ...week.map(minutesOn));
+  $('#chart').innerHTML = weekDates().map(d => {
+    const m = minutesOn(iso(d)), h = Math.round(m / max * 100);
+    return `<div class="flex-1 flex flex-col items-center justify-end h-full gap-1">
+      <span class="text-xs text-slate-500 dark:text-slate-400">${m || ''}</span>
+      <div class="w-full rounded-t-md ${iso(d) === todayStr() ? 'bg-hl' : 'bg-ink dark:bg-indigo-400'}" style="height:${Math.max(h, m ? 3 : 1)}%" title="${m} min"></div>
+      <span class="text-xs font-medium">${d.toLocaleDateString(undefined, { weekday: 'short' })}</span></div>`;
+  }).join('');
+
+  $('#goals').innerHTML = S.subjects.length ? S.subjects.map(s => {
+    const done = S.sessions.filter(x => x.subjectId === s.id && week.includes(x.date)).reduce((a, x) => a + x.min, 0);
+    const pct = Math.min(100, Math.round(done / (s.goal * 60) * 100));
+    return `<div><div class="flex justify-between text-sm"><span class="font-medium">${esc(s.name)}</span><span class="text-slate-500 dark:text-slate-400">${fmt(done)} / ${s.goal}h</span></div>
+      <div class="h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 mt-1 overflow-hidden"><div class="h-full rounded-full" style="width:${pct}%;background:${s.color}"></div></div></div>`;
+  }).join('') : '<p class="text-sm text-slate-500">Add a subject to set a weekly goal.</p>';
+
+  const soon = S.tasks.filter(t => !t.done).sort((a, b) => a.due.localeCompare(b.due)).slice(0, 4);
+  $('#upcoming').innerHTML = soon.length ? soon.map(taskRow).join('') : '<li class="py-3 text-sm text-slate-500">No open assignments. Add one in the Assignments tab.</li>';
+}
+
+function dueLabel(t) {
+  const diff = Math.round((new Date(t.due + 'T00:00') - new Date(todayStr() + 'T00:00')) / 864e5);
+  if (t.done) return ['Done', 'text-emerald-600'];
+  if (diff < 0) return [`${-diff}d overdue`, 'text-red-600 font-semibold'];
+  if (diff === 0) return ['Due today', 'text-orange-600 font-semibold'];
+  return [`Due ${prettyDate(t.due)} (${diff}d)`, 'text-slate-500 dark:text-slate-400'];
+}
+function taskRow(t) {
+  const s = subj(t.subjectId), [txt, cls] = dueLabel(t), pri = ['Low', 'Medium', 'High'][t.priority];
+  return `<li class="py-3 flex items-center gap-3">
+    <input type="checkbox" data-toggle="${t.id}" ${t.done ? 'checked' : ''} class="w-5 h-5 accent-indigo-700" aria-label="Mark ${esc(t.title)} as done">
+    <div class="flex-1 min-w-0">
+      <p class="font-medium truncate ${t.done ? 'line-through opacity-60' : ''}">${esc(t.title)}</p>
+      <p class="text-xs ${cls}">${txt} · ${pri} priority</p></div>
+    <span class="chip" style="background:${s.color}">${esc(s.name)}</span>
+    <button class="x" data-deltask="${t.id}" aria-label="Delete ${esc(t.title)}">Delete</button></li>`;
+}
+function renderTasks() {
+  $$('#taskFilter .mode').forEach(b => b.classList.toggle('on', b.dataset.f === S.filter));
+  let list = S.tasks.filter(t => S.filter === 'all' || (S.filter === 'done') === t.done);
+  list.sort((a, b) => a.done - b.done || a.due.localeCompare(b.due) || b.priority - a.priority);
+  $('#taskList').innerHTML = list.length ? list.map(taskRow).join('') : '<li class="py-6 text-center text-sm text-slate-500">Nothing here yet. Add an assignment to get started.</li>';
+}
+function renderSubjects() {
+  const week = weekDates().map(iso);
+  $('#subjList').innerHTML = S.subjects.map(s => {
+    const total = S.sessions.filter(x => x.subjectId === s.id).reduce((a, x) => a + x.min, 0);
+    const wk = S.sessions.filter(x => x.subjectId === s.id && week.includes(x.date)).reduce((a, x) => a + x.min, 0);
+    return `<div class="card border-l-8" style="border-left-color:${s.color}">
+      <div class="flex justify-between items-start"><h3 class="font-display font-bold text-lg">${esc(s.name)}</h3>
+      <button class="x" data-delsubj="${s.id}" aria-label="Delete ${esc(s.name)}">Delete</button></div>
+      <p class="text-sm mt-2">Weekly goal: <b>${s.goal}h</b></p>
+      <p class="text-sm">This week: <b>${fmt(wk)}</b></p>
+      <p class="text-sm text-slate-500 dark:text-slate-400">All time: ${fmt(total)}</p></div>`;
+  }).join('') || '<p class="text-sm text-slate-500">No subjects yet. Add your first one.</p>';
+}
+function renderLog() {
+  const f = $('#logFilter').value || 'all';
+  const list = S.sessions.filter(x => f === 'all' || x.subjectId === f).sort((a, b) => b.date.localeCompare(a.date));
+  $('#logList').innerHTML = list.length ? list.map(x => {
+    const s = subj(x.subjectId);
+    return `<li class="py-3 flex items-center gap-3">
+      <span class="chip" style="background:${s.color}">${esc(s.name)}</span>
+      <div class="flex-1 min-w-0"><p class="font-medium">${fmt(x.min)}${x.note ? ' · ' + esc(x.note) : ''}</p>
+      <p class="text-xs text-slate-500 dark:text-slate-400">${prettyDate(x.date)}</p></div>
+      <button class="x" data-dellog="${x.id}" aria-label="Delete session">Delete</button></li>`;
+  }).join('') : '<li class="py-6 text-center text-sm text-slate-500">No sessions logged. Start the timer or add one manually.</li>';
+}
+function fillSelects() {
+  const opts = S.subjects.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  ['#timerSubject', '#logSubject', '#taskSubject'].forEach(id => { const el = $(id), v = el.value; el.innerHTML = opts; if (v) el.value = v; });
+  const lf = $('#logFilter'), v = lf.value;
+  lf.innerHTML = '<option value="all">All subjects</option>' + opts; lf.value = v || 'all';
+}
+function renderAll() { fillSelects(); renderDash(); renderTasks(); renderSubjects(); renderLog(); save(); }
+
+/* ---------- Forms & list actions ---------- */
+function addSession(subjectId, min, date, note) {
+  S.sessions.push({ id: uid(), subjectId, min: +min, date, note });
+  renderAll();
+}
+$('#logForm').onsubmit = e => {
+  e.preventDefault();
+  addSession($('#logSubject').value, $('#logMin').value, $('#logDate').value, $('#logNote').value.trim());
+  e.target.reset(); $('#logDate').value = todayStr(); toast('Session added');
+};
+$('#taskForm').onsubmit = e => {
+  e.preventDefault();
+  S.tasks.push({ id: uid(), title: $('#taskTitle').value.trim(), subjectId: $('#taskSubject').value, due: $('#taskDue').value, priority: +$('#taskPri').value, done: false });
+  e.target.reset(); renderAll(); toast('Assignment added');
+};
+$('#subjForm').onsubmit = e => {
+  e.preventDefault();
+  S.subjects.push({ id: uid(), name: $('#subjName').value.trim(), goal: +$('#subjGoal').value, color: $('#subjColor').value });
+  e.target.reset(); $('#subjGoal').value = 5; $('#subjColor').value = '#2b3a8c'; renderAll(); toast('Subject added');
+};
+document.addEventListener('click', e => {
+  const t = e.target;
+  if (t.dataset.deltask) { S.tasks = S.tasks.filter(x => x.id !== t.dataset.deltask); renderAll(); }
+  if (t.dataset.dellog) { S.sessions = S.sessions.filter(x => x.id !== t.dataset.dellog); renderAll(); }
+  if (t.dataset.delsubj && confirm('Delete this subject and its sessions and assignments?')) {
+    const id = t.dataset.delsubj;
+    S.subjects = S.subjects.filter(x => x.id !== id); S.sessions = S.sessions.filter(x => x.subjectId !== id); S.tasks = S.tasks.filter(x => x.subjectId !== id);
+    renderAll();
+  }
+  if (t.dataset.f) { S.filter = t.dataset.f; renderAll(); }
+});
+document.addEventListener('change', e => {
+  if (e.target.dataset.toggle) { const k = S.tasks.find(x => x.id === e.target.dataset.toggle); k.done = e.target.checked; renderAll(); if (k.done) toast('Nice work. Assignment done'); }
+});
+$('#logFilter').onchange = renderLog;
+
+/* ---------- Focus timer ---------- */
+const CIRC = 339.3;
+let mode = 25, total = 25 * 60, left = total, running = false, endAt = 0, tick = null;
+function drawTimer() {
+  const m = String(Math.floor(left / 60)).padStart(2, '0'), s = String(left % 60).padStart(2, '0');
+  $('#clock').textContent = `${m}:${s}`;
+  $('#ring').style.strokeDashoffset = CIRC * (1 - left / total);
+  $('#startBtn').textContent = running ? 'Pause' : (left < total ? 'Resume' : 'Start');
+  $('#clockLabel').textContent = running ? (mode === 5 ? 'Break time' : 'Stay focused') : (left < total ? 'Paused' : 'Ready to focus');
+  $$('#modes .mode').forEach(b => b.classList.toggle('on', +b.dataset.mode === mode));
+  document.title = running ? `${m}:${s} · Inkwell` : 'Inkwell – Student Study Tracker';
+}
+function setMode(m) { clearInterval(tick); running = false; mode = m; total = left = m * 60; drawTimer(); }
+function finish() {
+  clearInterval(tick); running = false; left = 0; drawTimer();
+  if (mode !== 5) { addSession($('#timerSubject').value, mode, todayStr(), 'Timer session'); toast(`${mode} min logged. Take a break`); }
+  else toast('Break over. Back to it');
+  try { new (window.AudioContext || window.webkitAudioContext)().createOscillator().connect; } catch (e) {}
+  setTimeout(() => setMode(mode), 1500);
+}
+$('#startBtn').onclick = () => {
+  if (running) { clearInterval(tick); running = false; drawTimer(); return; }
+  if (!S.subjects.length && mode !== 5) return toast('Add a subject first');
+  running = true; endAt = Date.now() + left * 1000;
+  tick = setInterval(() => { left = Math.max(0, Math.round((endAt - Date.now()) / 1000)); drawTimer(); if (!left) finish(); }, 250);
+  drawTimer();
+};
+$('#resetBtn').onclick = () => setMode(mode);
+$('#modes').addEventListener('click', e => { if (e.target.dataset.mode) setMode(+e.target.dataset.mode); });
+
+/* ---------- Init ---------- */
+$('#today').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+$('#logDate').value = todayStr();
+$('#taskDue').min = todayStr();
+applyTheme(); renderAll(); drawTimer();
+showTab(['dash', 'timer', 'tasks', 'subjects', 'log'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'dash');
+</script>
+</body>
+</html>
