@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sahil Tighare</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+    <div class="bg-white w-full max-w-md p-6 rounded-xl shadow-lg">
+
+        <h1 class="text-2xl font-bold text-center text-blue-600 mb-5">
+            Personal To-Do List<br>
+            (My Tasks with Deadline)
+        </h1>
+
+        <!-- Task Input -->
+        <input
+            type="text"
+            id="taskInput"
+            placeholder="Enter your task"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3
+                   focus:outline-none focus:ring-2 focus:ring-blue-400"
+        >
+
+        <!-- Deadline Input -->
+        <div class="flex gap-2 mb-5">
+            <input
+                type="date"
+                id="deadlineInput"
+                class="flex-1 border border-gray-300 rounded-lg px-3 py-2
+                       focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+
+            <button
+                onclick="addTask()"
+                class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                Add
+            </button>
+        </div>
+
+        <!-- Task List -->
+        <ul id="taskList" class="space-y-3"></ul>
+
+    </div>
+
+    <script>
+
+        function addTask() {
+
+            let taskInput = document.getElementById("taskInput");
+            let deadlineInput = document.getElementById("deadlineInput");
+
+            let taskText = taskInput.value.trim();
+            let deadline = deadlineInput.value;
+
+            if (taskText === "" || deadline === "") {
+                alert("Please enter task and deadline!");
+                return;
+            }
+
+            // Create new task
+            let li = document.createElement("li");
+
+            li.className =
+                "flex items-center justify-between gap-3 bg-gray-100 p-3 rounded-lg";
+
+            // Task content
+            let taskDiv = document.createElement("div");
+            taskDiv.className = "flex-1";
+
+            let task = document.createElement("p");
+            task.textContent = taskText;
+            task.className = "font-medium cursor-pointer";
+
+            // Mark task completed
+            task.onclick = function () {
+                task.classList.toggle("line-through");
+                task.classList.toggle("text-gray-500");
+            };
+
+            let date = document.createElement("p");
+            date.textContent = "Deadline: " + deadline;
+            date.className = "text-sm text-gray-500";
+
+            taskDiv.appendChild(task);
+            taskDiv.appendChild(date);
+
+            // Delete button
+            let deleteButton = document.createElement("button");
+
+            deleteButton.textContent = "Delete";
+            deleteButton.className =
+                "bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600";
+
+            deleteButton.onclick = function () {
+                li.remove();   // Only this task will be deleted
+            };
+
+            // Add everything to li
+            li.appendChild(taskDiv);
+            li.appendChild(deleteButton);
+
+            // Add li to task list
+            document.getElementById("taskList").appendChild(li);
+
+            // Clear inputs
+            taskInput.value = "";
+            deadlineInput.value = "";
+        }
+
+    </script>
+
+</body>
+</html>
